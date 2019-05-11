@@ -90,6 +90,7 @@ class ToTensor(object):
         assert isinstance(digit, np.ndarray)
         digit = digit.reshape((1, 28, 28))
         digit = torch.from_numpy(digit)
+        digit = digit.float()
         return digit
 
 
