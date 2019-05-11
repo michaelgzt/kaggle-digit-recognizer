@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, sampler
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from dataloader import *
 from network import *
@@ -111,9 +112,44 @@ def validating(network, loader):
     return accuracy
 
 
+def testing(network):
+    """
+    Generate test result for Kaggle
+
+    :param network: trained network
+    :return:
+    """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    composed_transform = transforms.Compose([Regularize(), ToTensor()])
+    digit_dataset = DigitDataset('test.csv', './data/', train=False, transform=composed_transform)
+    test_dataloader = DataLoader(
+        digit_dataset,
+        batch_size=128,
+        shuffle=False,
+        num_workers=4,
+        pin_memory=True
+    )
+    test_results = []
+    for i, data in enumerate(test_dataloader, 0):
+        digits, label = data
+        digits = digits.to(device)
+        outputs = network(digits)
+        _, predicted = torch.max(outputs, 1)
+        test_results += np.int_(predicted.to("cpu").numpy().squeeze()).tolist()
+    """
+    Write test results to a csv file
+    """
+    test_df = pd.read_csv("./data/sample_submission.csv")
+    assert (len(test_df) == len(test_results))
+    test_df.loc[:, 'Label'] = test_results
+    test_df.to_csv('./data/test_results.csv', index=False)
+    print("Test Results for Kaggle Generated ...")
+
+
 if __name__ == '__main__':
     lenet = BasicLeNet()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(lenet.parameters())
-    lenet = training(lenet, criterion, optimizer, 30)
+    lenet = training(lenet, criterion, optimizer, 20, test=False)
+    testing(lenet)
 

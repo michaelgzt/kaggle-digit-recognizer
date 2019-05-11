@@ -50,7 +50,7 @@ class DigitDataset(Dataset):
         else:
             digit = self.digit_data.iloc[item, :].values
             digit = digit.astype('float').reshape((28, 28))
-            label = None
+            label = 0
         sample = [digit, label]
         if self.transform:
             sample[0] = self.transform(sample[0])
