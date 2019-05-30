@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader, sampler
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from dataloader import *
+from dataloader2 import *
 from network import *
 
 
@@ -32,9 +32,9 @@ def training(network, criterion, optimizer, epoch_num, test=True):
     Create Dataloader for training and validating
     """
     composed_transform = transforms.Compose([Regularize(), ToTensor()])
-    digit_dataset = DigitDataset('train.csv', './data/', train=True, transform=composed_transform)
+    digit_dataset = DigitDataset('train.csv', './data/', train=True, transform=composed_transform, argument=True)
     if test:
-        train_indices, val_indices = train_validate_split(digit_dataset)
+        train_indices, val_indices = train_validate_split(digit_dataset.digit_df, argument=True)
         train_sampler = sampler.SubsetRandomSampler(train_indices)
         val_sampler = sampler.SubsetRandomSampler(val_indices)
         train_dataloader = DataLoader(
@@ -147,9 +147,10 @@ def testing(network):
 
 
 if __name__ == '__main__':
-    lenet = BasicLeNet()
+    # lenet = BasicLeNet()
+    lenet = EnhancedLeNet()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(lenet.parameters())
-    lenet = training(lenet, criterion, optimizer, 20, test=False)
+    lenet = training(lenet, criterion, optimizer, 50, test=False)
     testing(lenet)
 
