@@ -49,6 +49,7 @@ class DigitDataset(Dataset):
 
         :param item: index of data
         :return: one item
+
         """
         if item < len(self.digit_df):
             if self.train:
